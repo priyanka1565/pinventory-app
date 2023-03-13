@@ -37,13 +37,27 @@ const userSchema = mongoose.Schema(
     bio: {
       type: String,
       maxLenght: [250, "Password must  not be more  than 250 characters"],
-      default: bio,
+      default: "bio",
     },
   },
   {
     timeStamps: true,
   }
 );
+
+ // Hash password
+  //Encrypt password before saving to DB
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(password, salt);
+  this.password = hashPassword
+  next();
+    
+  })
+
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
